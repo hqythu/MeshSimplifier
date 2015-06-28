@@ -78,6 +78,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GeoItems.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="SimpleObject.cpp" />
+    <ClCompile Include="Simplifier.cpp" />
+    <ClCompile Include="Vec3f.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeoItems.h" />
+    <ClInclude Include="SimpleObject.h" />
+    <ClInclude Include="Simplifier.h" />
+    <ClInclude Include="Vec3f.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
