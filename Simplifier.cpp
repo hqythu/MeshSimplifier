@@ -41,6 +41,27 @@ void Simplifier::load(string filename)
         const_cast<Vertex&>(*v2).facets.push_back(fi);
         const_cast<Vertex&>(*v3).facets.push_back(fi);
     }
+    for (auto& facet : facets) {
+        static int const ac[3] = { 0, 1, 2 };
+        static int const bc[3] = { 1, 2, 0 };
+        for (int i = 0; i < 3; i++) {
+            vertex_iter v1 = facet.vetexes[ac[i]];
+            vertex_iter v2 = facet.vetexes[bc[i]];
+            if (*v2 < *v1) {
+                vertex_iter tmp = v1;
+                v1 = v2;
+                v2 = tmp;
+            }
+            Edge e;
+            Vec3f diff = v1->position - v2->position;
+            e.delta_v = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
+            e.vetexes[0] = v1;
+            e.vetexes[1] = v2;
+            if (edges.find(e) != edges.end()) {
+                edges.insert(e);
+            }
+        }
+    }
 }
 
 
@@ -67,4 +88,10 @@ void Simplifier::save(string filename)
     }
 
     object.SaveToObj(filename.c_str());
+}
+
+
+void Simplifier::simplify()
+{
+
 }

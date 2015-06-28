@@ -17,6 +17,7 @@ public:
 
     void load(std::string);
     void save(std::string);
+    void simplify();
 
 private:
     void merge();

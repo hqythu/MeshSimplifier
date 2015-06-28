@@ -37,7 +37,24 @@ struct Edge
     vertex_iter vetexes[2];
     bool operator < (const Edge& op) const
     {
-        return delta_v < op.delta_v;
+        if (delta_v < op.delta_v) {
+            return true;
+        }
+        else if (op.delta_v < delta_v) {
+            return false;
+        }
+        else if (*vetexes[0] < *op.vetexes[0]) {
+            return true;
+        }
+        else if (*op.vetexes[0] < *vetexes[0]) {
+            return false;
+        }
+        else if (*vetexes[1] < *op.vetexes[1]) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 };
 
