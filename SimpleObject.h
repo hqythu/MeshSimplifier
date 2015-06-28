@@ -46,11 +46,11 @@ namespace SimpleOBJ
         bool LoadFromObj(const char* fn);
         bool SaveToObj(const char* fn);
         
-    protected:
+    public:
         bool Parse(FILE* fp);
         bool CheckParse(int nVertices,std::vector<Array<int,3> > & vecTriangles);
 
-    protected:
+    public:
 
         int             m_nVertices;
         int             m_nTriangles;

@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <list>
+#include <string>
 
 #include "GeoItems.h"
 
@@ -14,10 +15,16 @@ public:
     Simplifier();
     ~Simplifier();
 
+    void load(std::string);
+    void save(std::string);
+
 private:
-    std::list<Vertex> vertexes;
+    void merge();
+    void update();
+
+    std::set<Vertex> vertexes;
     std::set<Edge> edges;
-    std::list<Facet> facets;
+    std::set<Facet> facets;
 };
 
 
