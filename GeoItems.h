@@ -40,7 +40,7 @@ struct Vertex
 struct Edge
 {
     double delta_v;
-    vertex_iter vetexes[2];
+    vertex_iter vertexes[2];
     bool operator < (const Edge& op) const
     {
         if (delta_v < op.delta_v) {
@@ -49,13 +49,13 @@ struct Edge
         else if (op.delta_v < delta_v) {
             return false;
         }
-        else if (*vetexes[0] < *op.vetexes[0]) {
+        else if (*vertexes[0] < *op.vertexes[0]) {
             return true;
         }
-        else if (*op.vetexes[0] < *vetexes[0]) {
+        else if (*op.vertexes[0] < *vertexes[0]) {
             return false;
         }
-        else if (*vetexes[1] < *op.vetexes[1]) {
+        else if (*vertexes[1] < *op.vertexes[1]) {
             return true;
         }
         else {
@@ -64,42 +64,52 @@ struct Edge
     }
     bool operator == (const Edge& op) const
     {
-        if (!(*vetexes[0] == *op.vetexes[0])) {
+        if (!(*vertexes[0] == *op.vertexes[0])) {
             return false;
         }
-        else if (!(*vetexes[1] == *op.vetexes[1])) {
+        else if (!(*vertexes[1] == *op.vertexes[1])) {
             return false;
         }
         else {
             return true;
         }
     }
+    bool is_not_edge() const
+    {
+        return vertexes[0] == vertexes[1];
+    }
 };
 
 
 struct Facet
 {
-    vertex_iter vetexes[3];
+    vertex_iter vertexes[3];
     bool operator < (const Facet& op) const
     {
-        if (*vetexes[0] < *op.vetexes[0]) {
+        if (*vertexes[0] < *op.vertexes[0]) {
             return true;
         }
-        else if (*op.vetexes[0] < *vetexes[0]) {
+        else if (*op.vertexes[0] < *vertexes[0]) {
             return false;
         }
-        else if (*vetexes[1] < *op.vetexes[1]){
+        else if (*vertexes[1] < *op.vertexes[1]){
             return true;
         }
-        else if (*op.vetexes[1] < *vetexes[1]) {
+        else if (*op.vertexes[1] < *vertexes[1]) {
             return false;
         }
-        else if (*vetexes[2] < *op.vetexes[2]) {
+        else if (*vertexes[2] < *op.vertexes[2]) {
             return true;
         }
         else {
             return false;
         }
+    }
+    bool is_not_facet() const
+    {
+        return vertexes[0] == vertexes[1]
+            || vertexes[0] == vertexes[2]
+            || vertexes[1] == vertexes[2];
     }
 };
 

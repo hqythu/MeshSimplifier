@@ -34,9 +34,9 @@ void Simplifier::load(string filename)
         vertex_iter v1 = vertexes.find(Vertex(object.m_pTriangleList[i][0]));
         vertex_iter v2 = vertexes.find(Vertex(object.m_pTriangleList[i][1]));
         vertex_iter v3 = vertexes.find(Vertex(object.m_pTriangleList[i][2]));
-        f.vetexes[0] = v1;
-        f.vetexes[1] = v2;
-        f.vetexes[2] = v3;
+        f.vertexes[0] = v1;
+        f.vertexes[1] = v2;
+        f.vertexes[2] = v3;
         facet_iter fi = facets.insert(f).first;
         const_cast<Vertex&>(*v1).facets.push_back(fi);
         const_cast<Vertex&>(*v2).facets.push_back(fi);
@@ -46,8 +46,8 @@ void Simplifier::load(string filename)
         static int const ac[3] = { 0, 1, 2 };
         static int const bc[3] = { 1, 2, 0 };
         for (int i = 0; i < 3; i++) {
-            vertex_iter v1 = facet.vetexes[ac[i]];
-            vertex_iter v2 = facet.vetexes[bc[i]];
+            vertex_iter v1 = facet.vertexes[ac[i]];
+            vertex_iter v2 = facet.vertexes[bc[i]];
             if (*v2 < *v1) {
                 vertex_iter tmp = v1;
                 v1 = v2;
@@ -56,8 +56,8 @@ void Simplifier::load(string filename)
             Edge e;
             Vec3f diff = v1->position - v2->position;
             e.delta_v = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
-            e.vetexes[0] = v1;
-            e.vetexes[1] = v2;
+            e.vertexes[0] = v1;
+            e.vertexes[1] = v2;
             edge_iter ei = edges.find(e);
             if (ei != edges.end()) {
                 ei = edges.insert(e).first;
@@ -89,9 +89,9 @@ void Simplifier::save(string filename)
 
     auto f = facets.begin();
     for (int i = 0; i < object.m_nTriangles; i++) {
-        object.m_pTriangleList[i][0] = f->vetexes[0]->label;
-        object.m_pTriangleList[i][1] = f->vetexes[1]->label;
-        object.m_pTriangleList[i][2] = f->vetexes[2]->label;
+        object.m_pTriangleList[i][0] = f->vertexes[0]->label;
+        object.m_pTriangleList[i][1] = f->vertexes[1]->label;
+        object.m_pTriangleList[i][2] = f->vertexes[2]->label;
         ++f;
     }
 
@@ -104,8 +104,8 @@ void Simplifier::simplify(double ratio)
     int iter_n = static_cast<int>(ratio * facets.size());
     for (int i = 0; i < iter_n; i++) {
         edge_iter e = edges.begin();
-        vertex_iter v1 = e->vetexes[0];
-        vertex_iter v2 = e->vetexes[1];
+        vertex_iter v1 = e->vertexes[0];
+        vertex_iter v2 = e->vertexes[1];
         Vec3f new_pos = (v1->position + v2->position) / 2;
     }
 }
@@ -113,5 +113,85 @@ void Simplifier::simplify(double ratio)
 
 void Simplifier::merge(vertex_iter v1, vertex_iter v2)
 {
+    vector<facet_iter> new_facets = v1->facets;
+    new_facets.insert(new_facets.end(), v2->facets.begin(), v2->facets.end());
 
+    const_cast<Vertex&>(*v1).facets.clear();
+
+    auto i1 = new_facets.begin();
+    auto i2 = new_facets.begin();
+    while (i2 != new_facets.end()) {
+        for (auto i3 = new_facets.begin(); i3 != i1; ++i3) {
+            if (!(*i3 == *i2)) {
+                std::swap(*i1, *i2);
+                ++i1;
+            }
+            ++i2;
+        }
+    }
+    new_facets.erase(i1, new_facets.end());
+
+    for (auto& facet : new_facets) {
+        for (int j = 0; j < 3; j++) {
+            if (facet->vertexes[j] == v2) {
+                Facet f = *facet;
+                f.vertexes[j] = v1;
+                facets.erase(facet);
+                facet = facets.insert(f).first;
+            }
+        }
+        if (facet->is_not_facet()) {
+            facets.erase(facet);
+            continue;
+        }
+
+        const_cast<Vertex&>(*v1).facets.push_back(facet);
+    }
+
+    vector<edge_iter> new_edges = v1->edges;
+    new_edges.insert(new_edges.end(), v2->edges.begin(), v2->edges.end());
+
+    const_cast<Vertex&>(*v1).edges.clear();
+
+    auto ii1 = new_edges.begin();
+    auto ii2 = new_edges.begin();
+    while (ii2 != new_edges.end()) {
+        for (auto ii3 = new_edges.begin(); ii3 != ii1; ++ii3) {
+            if (!(*ii3 == *ii2)) {
+                std::swap(*ii1, *ii2);
+                ++ii1;
+            }
+            ++ii2;
+        }
+    }
+    new_edges.erase(ii1, new_edges.end());
+
+    for (size_t i = 0; i < new_edges.size(); i++) {
+        edge_iter& edge = new_edges[i];
+        for (int j = 0; j < 2; j++) {
+            if (edge->vertexes[j] == v2) {
+                Edge e = *edge;
+                e.vertexes[j] = v1;
+                edges.erase(edge);
+                edge = edges.insert(e).first;
+            }
+        }
+        if (edge->is_not_edge()) {
+            edges.erase(edge);
+            continue;
+        }
+        bool has = false;
+        for (size_t j = 0; j < i; j++) {
+            if (new_edges[i] == edge) {
+                edges.erase(edge);
+                has = true;
+                break;
+            }
+        }
+        if (!has) {
+            const_cast<Vertex&>(*v1).edges.push_back(edge);
+        }
+    }
+
+    vertexes.erase(v2);
 }
