@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <algorithm>
 
 #include "Vec3f.h"
 
@@ -23,8 +24,8 @@ struct Vertex
     int label;
     int rank;
     Vec3f position;
-    std::vector<facet_iter> facets;
-    std::vector<edge_iter> edges;
+    std::list<facet_iter> facets;
+    std::list<edge_iter> edges;
     Vertex(int label) : label(label) {}
     bool operator < (const Vertex& op) const
     {
@@ -87,6 +88,26 @@ struct Edge
         Vec3f diff = vertexes[0]->position - vertexes[1]->position;
         delta_v = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
     }
+    void reset(const edge_iter& before, const edge_iter& after) const
+    {
+        for (int i = 0; i < 2; i++) {
+            const vertex_iter& v = vertexes[i];
+            auto res = std::find(v->edges.begin(), v->edges.end(), before);
+            if (res != v->edges.end()) {
+                const_cast<edge_iter&>(*res) = after;
+            }
+        }
+    }
+    void clear(const edge_iter& e) const
+    {
+        for (int i = 0; i < 2; i++) {
+            const vertex_iter& v = vertexes[i];
+            auto res = std::find(v->edges.begin(), v->edges.end(), e);
+            if (res != v->edges.end()) {
+                const_cast<Vertex&>(*v).edges.erase(res);
+            }
+        }
+    }
 };
 
 
@@ -127,6 +148,26 @@ struct Facet
     void recalculate_Kp()
     {
 
+    }
+    void reset(const facet_iter& before, const facet_iter& after) const
+    {
+        for (int i = 0; i < 3; i++) {
+            const vertex_iter& v = vertexes[i];
+            auto res = std::find(v->facets.begin(), v->facets.end(), before);
+            if (res != v->facets.end()) {
+                const_cast<facet_iter&>(*res) = after;
+            }
+        }
+    }
+    void clear(const facet_iter& f) const
+    {
+        for (int i = 0; i < 3; i++) {
+            const vertex_iter& v = vertexes[i];
+            auto res = std::find(v->facets.begin(), v->facets.end(), f);
+            if (res != v->facets.end()) {
+                const_cast<Vertex&>(*v).facets.erase(res);
+            }
+        }
     }
 };
 
