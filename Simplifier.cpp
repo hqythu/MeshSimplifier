@@ -54,10 +54,9 @@ void Simplifier::load(string filename)
                 v2 = tmp;
             }
             Edge e;
-            Vec3f diff = v1->position - v2->position;
-            e.delta_v = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
             e.vertexes[0] = v1;
             e.vertexes[1] = v2;
+            e.recalculate_v();
             edge_iter ei = edges.find(e);
             if (ei != edges.end()) {
                 ei = edges.insert(e).first;
@@ -107,6 +106,9 @@ void Simplifier::simplify(double ratio)
         vertex_iter v1 = e->vertexes[0];
         vertex_iter v2 = e->vertexes[1];
         Vec3f new_pos = (v1->position + v2->position) / 2;
+        const_cast<Vertex&>(*v1).position = new_pos;
+        merge(v1, v2);
+        update(v1);
     }
 }
 
@@ -194,4 +196,35 @@ void Simplifier::merge(vertex_iter v1, vertex_iter v2)
     }
 
     vertexes.erase(v2);
+}
+
+
+void Simplifier::update(vertex_iter v)
+{
+    vector<vertex_iter> vertex_to_update;
+    vector<edge_iter> edge_to_update;
+    for (auto& facet : v->facets) {
+        const_cast<Facet&>(*facet).recalculate_n();
+        const_cast<Facet&>(*facet).recalculate_Kp();
+        for (int j = 0; j < 3; j++) {
+            if (std::find(vertex_to_update.begin(), vertex_to_update.end(), facet->vertexes[j])
+                == vertex_to_update.end()) {
+                vertex_to_update.push_back(facet->vertexes[j]);
+            }
+        }
+    }
+    for (auto& vertex : vertex_to_update) {
+        const_cast<Vertex&>(*vertex).recalculate_Q();
+        for (auto& edge : vertex->edges) {
+            if (std::find(edge_to_update.begin(), edge_to_update.end(), edge) == edge_to_update.end()) {
+                edge_to_update.push_back(edge);
+            }
+        }
+    }
+    for (auto& edge : edge_to_update) {
+        Edge e = *edge;
+        e.recalculate_v();
+        edges.erase(edge);
+        edges.insert(e);
+    }
 }

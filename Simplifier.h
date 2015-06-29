@@ -21,7 +21,7 @@ public:
 
 private:
     void merge(vertex_iter v1, vertex_iter v2);
-    void update();
+    void update(vertex_iter v);
 
     std::set<Vertex> vertexes;
     std::set<Edge> edges;

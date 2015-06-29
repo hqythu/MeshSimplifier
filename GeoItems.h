@@ -34,6 +34,10 @@ struct Vertex
     {
         return label == op.label;
     }
+    void recalculate_Q()
+    {
+
+    }
 };
 
 
@@ -78,6 +82,11 @@ struct Edge
     {
         return vertexes[0] == vertexes[1];
     }
+    void recalculate_v()
+    {
+        Vec3f diff = vertexes[0]->position - vertexes[1]->position;
+        delta_v = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
+    }
 };
 
 
@@ -110,6 +119,14 @@ struct Facet
         return vertexes[0] == vertexes[1]
             || vertexes[0] == vertexes[2]
             || vertexes[1] == vertexes[2];
+    }
+    void recalculate_n()
+    {
+
+    }
+    void recalculate_Kp()
+    {
+
     }
 };
 
