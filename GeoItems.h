@@ -21,12 +21,18 @@ typedef std::set<Facet>::iterator facet_iter;
 struct Vertex
 {
     int label;
+    int rank;
     Vec3f position;
     std::vector<facet_iter> facets;
+    std::vector<edge_iter> edges;
     Vertex(int label) : label(label) {}
     bool operator < (const Vertex& op) const
     {
         return label < op.label;
+    }
+    bool operator == (const Vertex& op) const
+    {
+        return label == op.label;
     }
 };
 
@@ -54,6 +60,18 @@ struct Edge
         }
         else {
             return false;
+        }
+    }
+    bool operator == (const Edge& op) const
+    {
+        if (!(*vetexes[0] == *op.vetexes[0])) {
+            return false;
+        }
+        else if (!(*vetexes[1] == *op.vetexes[1])) {
+            return false;
+        }
+        else {
+            return true;
         }
     }
 };

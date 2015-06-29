@@ -17,10 +17,10 @@ public:
 
     void load(std::string);
     void save(std::string);
-    void simplify();
+    void simplify(double ratio);
 
 private:
-    void merge();
+    void merge(vertex_iter v1, vertex_iter v2);
     void update();
 
     std::set<Vertex> vertexes;

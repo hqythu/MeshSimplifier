@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <set>
+#include <algorithm>
 
 using std::string;
 using std::vector;
@@ -57,8 +58,15 @@ void Simplifier::load(string filename)
             e.delta_v = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
             e.vetexes[0] = v1;
             e.vetexes[1] = v2;
-            if (edges.find(e) != edges.end()) {
-                edges.insert(e);
+            edge_iter ei = edges.find(e);
+            if (ei != edges.end()) {
+                ei = edges.insert(e).first;
+            }
+            if (std::find(v1->edges.begin(), v1->edges.end(), ei) == v1->edges.end()) {
+                const_cast<Vertex&>(*v1).edges.push_back(ei);
+            }
+            if (std::find(v2->edges.begin(), v2->edges.end(), ei) == v2->edges.end()) {
+                const_cast<Vertex&>(*v2).edges.push_back(ei);
             }
         }
     }
@@ -91,7 +99,19 @@ void Simplifier::save(string filename)
 }
 
 
-void Simplifier::simplify()
+void Simplifier::simplify(double ratio)
+{
+    int iter_n = static_cast<int>(ratio * facets.size());
+    for (int i = 0; i < iter_n; i++) {
+        edge_iter e = edges.begin();
+        vertex_iter v1 = e->vetexes[0];
+        vertex_iter v2 = e->vetexes[1];
+        Vec3f new_pos = (v1->position + v2->position) / 2;
+    }
+}
+
+
+void Simplifier::merge(vertex_iter v1, vertex_iter v2)
 {
 
 }
