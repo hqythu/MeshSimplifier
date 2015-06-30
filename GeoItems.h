@@ -6,6 +6,9 @@
 #include <set>
 #include <algorithm>
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include "Vec3f.h"
 
 using SimpleOBJ::Vec3f;
@@ -18,6 +21,10 @@ typedef std::set<Vertex>::iterator vertex_iter;
 typedef std::set<Edge>::iterator edge_iter;
 typedef std::set<Facet>::iterator facet_iter;
 
+struct Vertex;
+struct Edge;
+struct Facet;
+
 
 struct Vertex
 {
@@ -26,6 +33,7 @@ struct Vertex
     Vec3f position;
     std::list<facet_iter> facets;
     std::list<edge_iter> edges;
+    cv::Matx44f Q;
     Vertex(int label) : label(label) {}
     bool operator < (const Vertex& op) const
     {
@@ -35,16 +43,14 @@ struct Vertex
     {
         return label == op.label;
     }
-    void recalculate_Q()
-    {
-
-    }
+    void recalculate_Q();
 };
 
 
 struct Edge
 {
     double delta_v;
+    Vec3f v;
     vertex_iter vertexes[2];
     bool operator < (const Edge& op) const
     {
@@ -83,11 +89,8 @@ struct Edge
     {
         return vertexes[0] == vertexes[1];
     }
-    void recalculate_v()
-    {
-        Vec3f diff = vertexes[0]->position - vertexes[1]->position;
-        delta_v = diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2];
-    }
+    void recalculate_v();
+    void recalculate_deltav();
     void reset(const edge_iter& before, const edge_iter& after) const
     {
         for (int i = 0; i < 2; i++) {
@@ -114,6 +117,9 @@ struct Edge
 struct Facet
 {
     vertex_iter vertexes[3];
+    cv::Matx44f Kp;
+    Vec3f normal;
+    float d;
     bool operator < (const Facet& op) const
     {
         if (*vertexes[0] < *op.vertexes[0]) {
@@ -141,14 +147,8 @@ struct Facet
             || vertexes[0] == vertexes[2]
             || vertexes[1] == vertexes[2];
     }
-    void recalculate_n()
-    {
-
-    }
-    void recalculate_Kp()
-    {
-
-    }
+    void recalculate_n();
+    void recalculate_Kp();
     void reset(const facet_iter& before, const facet_iter& after) const
     {
         for (int i = 0; i < 3; i++) {

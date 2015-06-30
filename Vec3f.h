@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <cassert>
+#include <cmath>
 
 namespace SimpleOBJ
 {
@@ -16,6 +17,17 @@ namespace SimpleOBJ
         Vec3f(const Vec3f& v);
         //Deconstructor
         virtual ~Vec3f();
+
+        static Vec3f multi_out(Vec3f const &a, Vec3f const &b) {
+            return Vec3f(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+        }
+        void to_unit() {
+            float t = std::sqrt(x * x + y * y + z * z);
+            x /= t;
+            y /= t;
+            z /= t;
+        }
+
     public:
         //Operators
 

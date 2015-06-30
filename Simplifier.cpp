@@ -46,6 +46,13 @@ void Simplifier::load(string filename)
         const_cast<Vertex&>(*v3).facets.push_back(fi);
     }
     for (auto& facet : facets) {
+        const_cast<Facet&>(facet).recalculate_n();
+        const_cast<Facet&>(facet).recalculate_Kp();
+    }
+    for (auto& vertex : vertexes) {
+        const_cast<Vertex&>(vertex).recalculate_Q();
+    }
+    for (auto& facet : facets) {
         static int const ac[3] = { 0, 1, 2 };
         static int const bc[3] = { 1, 2, 0 };
         for (int i = 0; i < 3; i++) {
@@ -60,6 +67,7 @@ void Simplifier::load(string filename)
             e.vertexes[0] = v1;
             e.vertexes[1] = v2;
             e.recalculate_v();
+            e.recalculate_deltav();
             edge_iter ei = edges.find(e);
             if (ei == edges.end()) {
                 ei = edges.insert(e).first;
@@ -111,7 +119,9 @@ void Simplifier::simplify(double ratio)
     int iter_n = static_cast<int>((1 - ratio) * vertexes.size());
     std::cout << iter_n << std::endl;
     for (int i = 0; i < iter_n; i++) {
-        std::cout << i << "/" << iter_n << std::endl;
+        if (i % 1000 == 0) {
+            std::cout << i << "/" << iter_n << std::endl;
+        }
         edge_iter e = edges.begin();
         vertex_iter v1 = e->vertexes[0];
         vertex_iter v2 = e->vertexes[1];
@@ -262,6 +272,7 @@ void Simplifier::update(vertex_iter v)
     for (auto& edge : edge_to_update) {
         Edge e = *edge;
         e.recalculate_v();
+        e.recalculate_deltav();
         auto res = edges.insert(e);
         auto it = res.first;
         if (res.second) {
