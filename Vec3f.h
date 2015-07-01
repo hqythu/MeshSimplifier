@@ -4,6 +4,8 @@
 #include <cstring>
 #include <cassert>
 #include <cmath>
+#include <iostream>
+#include <fstream>
 
 namespace SimpleOBJ
 {
@@ -27,6 +29,8 @@ namespace SimpleOBJ
             y /= t;
             z /= t;
         }
+
+        friend std::ostream &operator <<(std::ostream &, Vec3f const &);
 
     public:
         //Operators

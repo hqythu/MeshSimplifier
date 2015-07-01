@@ -4,6 +4,11 @@
 namespace SimpleOBJ
 {
 
+std::ostream &operator <<(std::ostream &os, Vec3f const &v) {
+    os << "(" << v.x << "," << v.y << "," << v.z << ")";
+    return os;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Constructors and Deconstructors
     Vec3f::Vec3f(void)
