@@ -6,8 +6,8 @@
 int main()
 {
     Simplifier s;
-    s.load("fixed.perfect.dragon.100K.0.07.obj");
-    s.simplify(0.1);
+    s.load("sphere.obj");
+    s.simplify(0.25);
     s.save("output.obj");
     return 0;
 }

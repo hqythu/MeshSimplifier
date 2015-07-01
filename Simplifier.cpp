@@ -206,23 +206,33 @@ void Simplifier::merge(vertex_iter v1, vertex_iter v2)
 
     for (auto i = new_edges.begin(); i != new_edges.end();) {
         edge_iter& edge = *i;
+        Edge e;
+        bool updated = false;
         for (int j = 0; j < 2; j++) {
             if (edge->vertexes[j] == v2) {
-                Edge e = *edge;
+                e = *edge;
                 e.vertexes[j] = v1;
                 if (*e.vertexes[1] < *e.vertexes[0]) {
                     vertex_iter tmp = e.vertexes[0];
                     e.vertexes[0] = e.vertexes[1];
                     e.vertexes[1] = tmp;
                 }
-                auto res = edges.insert(e);
-                auto it = res.first;
-                if (res.second) {
-                    it->reset(edge, it);
-                    edges.erase(edge);
-                    edge = it;
-                }
+                updated = true;
             }
+        }
+        bool repeated = true;
+        if (updated) {
+            auto res = edges.insert(e);
+            auto it = res.first;
+            if (!res.second) {
+                it->clear(edge);
+                repeated = false;
+            }
+            else {
+                it->reset(edge, it);
+            }
+            edges.erase(edge);
+            edge = it;
         }
         if (edge->is_not_edge()) {
             edge->clear(edge);
@@ -232,13 +242,21 @@ void Simplifier::merge(vertex_iter v1, vertex_iter v2)
         }
         bool has = false;
         for (auto j = new_edges.begin(); j != i; ++j) {
-            if (*j == edge) {
+            if (**j == *edge) {
                 has = true;
                 break;
             }
         }
         if (!has) {
             const_cast<Vertex&>(*v1).edges.push_back(edge);
+        }
+        else {
+            if (repeated) {
+                edge->clear(edge);
+                edges.erase(edge);
+            }
+            new_edges.erase(i++);
+            continue;
         }
         ++i;
     }
